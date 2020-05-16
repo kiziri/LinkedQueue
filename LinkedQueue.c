@@ -17,16 +17,25 @@ typedef struct pcb      // PCB 구조체 선언부
     struct pcb* pre;
     struct pcb* next;
 } node;
-  node* head;
-  node* rear;
+
+typedef struct Queue
+{
+    int count;
+    node* head;
+    node* rear;
+} queue;
 
 
 void menuScreen();      // 메뉴화면 출력하는 함수
 int menuSelect();       // 메뉴 선택 입력하는 함수
-
+void initQue(queue* que);      // 큐 초기화 함수
+int isEmpty(queue* que);     //큐가 공백인지 아닌지 검사
+void inputData(queue* que);            // PCB 정보 입력 함수
+void enQueue(queue* que, int pid, char state, int priority, char memLoc, int schedule);
 
 int main()
 {
+    queue que;
 
 
     while (1) {
@@ -93,28 +102,80 @@ int menuSelect()        // 메뉴 선택 입력 함수
     return menuNum;
 }
 
-void initQue()      // 큐 초기화 함수
+void initQue(queue *que)      // 큐 초기화 함수
 {
-    head = (node*)malloc(sizeof(node));         // 동적 메모리 할당
-    rear = (node*)malloc(sizeof(node));
-
-    // 초화화 상태 연결
-    head->pre = head;
-    head->next = rear;
-    rear->pre = head;
-    rear->next = rear;
+    que->head = NULL;
+    que->rear = NULL;
+    que->count = 0;
 }
 
-
-
-int isEmpty()       //덱이 공백인지 아닌지 검사
+int isEmpty(queue *que)       //큐가 공백인지 아닌지 검사
 {
-    if (NULL) {
+    if (que-> count == 0) {
 
         printf("\n Linked Queue is empty! \n");
 
-        return 1; //front 널이면 종료
+        return 1;
 
     }
     else return 0;
+}
+
+void inputData(queue* que)      // PCB 정보 입력 함수
+{
+    int inputPID;
+    char state;
+    int priority;
+    char memLocation;
+    int scheduleInfo;
+
+    printf("\n\n");
+    printf("PID 설정 >> "); scanf_s("%d", &inputPID);
+    printf("우선순위 설정 >> "); scanf_s("%d", &priority);
+    printf("메모리 위치 설정 >> "); scanf_s("%s", &memLocation);
+    printf("스케쥴정보 설정 >> "); scanf_s("%d", &scheduleInfo);
+
+    enQueue(que, inputPID,'r', priority, memLocation, scheduleInfo);
+}
+
+void enQueue(queue* que, int pid, char state, int priority, char memLoc, int schedule)
+{
+    node* tmp = (node*)malloc(sizeof(node));
+    tmp->pid = pid;
+    tmp->state = state;
+    tmp->priority = priority;
+    tmp->memLocation = memLoc;
+    tmp->scheduleInfo = schedule;
+    tmp->next = NULL;
+
+    if (isEmpty(que))       // 큐가 비어있을 때
+    {
+        que->head = tmp;
+    }
+    else                    // 큐가 비어있지 않을 때
+    {
+        que->rear->next = tmp;
+    }
+    que->rear = tmp;        // 맨 뒤를 tmp로 인식
+    que->count++;           // 보관 개수 증가
+}
+
+void deQueue()          // 큐 삭제 함수
+{
+
+}
+
+void printQueue()       // 큐 전체 출력 함수
+{
+
+}
+
+node* searchPCB()       // 큐 검색 함수
+{
+
+}
+
+void deleteSelectedPCB()
+{
+
 }
