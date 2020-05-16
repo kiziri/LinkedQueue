@@ -2,7 +2,6 @@
 삽입, 탐색, 삭제가 가능하며, 기능에 해당하는 메뉴를
 선택하여 사용합니다.
 2015244020_장우진 */
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,7 +11,7 @@ typedef struct pcb      // PCB 구조체 선언부
     int pid;
     char state;
     int priority;
-    char memLocation;
+    int memLocation;
     int scheduleInfo;
     struct pcb* pre;
     struct pcb* next;
@@ -31,7 +30,7 @@ int menuSelect();       // 메뉴 선택 입력하는 함수
 void initQue(queue* que);      // 큐 초기화 함수
 int isEmpty(queue* que);     //큐가 공백인지 아닌지 검사
 void inputData(queue* que);             // PCB 정보 입력 함수
-void enQueue(queue* que, int pid, char state, int priority, char memLoc, int schedule);     // PCB 정보 삽입
+void enQueue(queue* que, int pid, char state, int priority, int memLoc, int schedule);     // PCB 정보 삽입
 void deQueue(queue* que);               // 큐 순서 실행상태 삭제 함수
 void printQueue(queue* que);            // 큐 전체 출력 함수
 node* searchPCB(queue* que, int PID);             // 큐 검색 함수
@@ -46,40 +45,42 @@ int main()
     while (1) {
 
         menuScreen();
-
-
         switch (menuSelect())
         {
         case 1:
             inputData(&que);
-            system("puase");
-            system("cls");
+            system("pause");
+            fflush(stdin);
             break;
         case 2:
             printQueue(&que);
-            system("puase");
-            system("cls");
+            system("pause");
+            fflush(stdin);
+            break;
         case 3:
             printSearch(&que);
-            system("puase");
-            system("cls");
+            system("pause");
+            fflush(stdin);
             break;
         case 4:
-
-            system("puase");
-            system("cls");
+            deleteSelectedPCB(&que);
+            system("pause");
+            fflush(stdin);
             break;
         case 5:
             deQueue(&que);
-            system("puase");
-            system("cls");
+            system("pause");
+            fflush(stdin);
             break;
         case 6:
             printf("\n\n프로그램을 종료합니다.\n\n");
             exit(0);
             break;
         }
+        system("cls");
     }
+
+
     return 0;
 }
 
@@ -127,22 +128,22 @@ int isEmpty(queue *que)       //큐가 공백인지 아닌지 검사
 void inputData(queue* que)      // PCB 정보 입력 함수
 {
     int inputPID;
-    char state;
+    char state = 't';
     int priority;
-    char memLocation;
+    int memLocation;
     int scheduleInfo;
 
     printf("\n\n새로운 노드 정보 입력 및 삽입");
     printf("\n\n");
     printf("PID 설정 >> "); scanf_s("%d", &inputPID);
     printf("우선순위 설정 >> "); scanf_s("%d", &priority);
-    printf("메모리 위치 설정 >> "); scanf_s("%s", &memLocation);
+    printf("메모리 위치 설정 >> "); scanf_s("%d", &memLocation);
     printf("스케쥴정보 설정 >> "); scanf_s("%d", &scheduleInfo);
 
-    enQueue(que, inputPID,'r', priority, memLocation, scheduleInfo);
+    enQueue(que, inputPID, state, priority, memLocation, scheduleInfo);
 }
 
-void enQueue(queue* que, int pid, char state, int priority, char memLoc, int schedule)
+void enQueue(queue* que, int pid, char state, int priority, int memLoc, int schedule)
 {
     node* tmp = (node*)malloc(sizeof(node));
     tmp->pid = pid;
@@ -196,6 +197,8 @@ void printQueue(queue *que)       // 큐 전체 출력 함수
                                                     tmp->priority, tmp->memLocation, tmp->scheduleInfo);
         tmp = tmp->next;
     }
+
+    printf("\n\n");
 }
 
 node *searchPCB(queue* que, int PID)       // 큐 검색 함수
@@ -212,7 +215,7 @@ node *searchPCB(queue* que, int PID)       // 큐 검색 함수
 
         if (isEmpty(que))       // 큐가 비어있을 때
         {
-            return;
+            return 0;
         }
         tmp = tmp->next;
     }
@@ -227,15 +230,84 @@ void printSearch(queue* que)            // 검색한 큐 결과 출력
     node* tmp;
 
     printf("\n\n\n검색하고 싶은 PCB : ");
+    fflush(stdin);
     scanf_s("%d", &inputPID);
     tmp = searchPCB(que, inputPID);
 
+    if (searchPCB(que, inputPID) == 0)
+    {
+        printf("\n\n 검새하고자 하는 PCB가 없습니다.\n\n");
+        return;
+    }
+
     printf("\n\n검색한 PID의 결과\n");
+    printf("Data.NO\tPID\tState\tPriority   Mem.Loc\tSchedule.info\n");
     printf("%d Data >> %d\t%c\t%d\t%c\t%d \n", que->count - (cnt--), tmp->pid, tmp->state,
         tmp->priority, tmp->memLocation, tmp->scheduleInfo);
+
+    printf("\n\n");
 }
 
 void deleteSelectedPCB(queue* que)        // 선택한 PCB만을 삭제 함수
 {
+    int inputPID;
+    int cnt = que->count - 1;
+    node* tmp, *pre;
+    tmp = que->front;
+    pre = que->front;
 
+    printf("\n\n\n삭제하고 싶은 PCB : ");
+    fflush(stdin);
+    scanf_s("%d", &inputPID);
+
+    if (searchPCB(que, inputPID) == 0)
+    {
+        printf("\n\n 삭제하고자 하는 PCB가 없습니다.\n\n");
+        return;
+    }
+
+    while (tmp != NULL)
+    {
+        if (tmp->pid == inputPID)
+        {
+            if (tmp == que->front && tmp == que->rear)          // 큐에 PCB가 1개 뿐일 때
+            {
+                que->front = NULL;
+                que->rear = NULL;
+                que->count = 0;
+                free(tmp);
+                printf("\n\n해당 PID의 PDB 삭제 완료!\n\n");
+                return;
+            }
+
+            if (tmp == que->front)          // 큐에 해당 PCB가 가장 앞일 때
+            {
+                que->front = que->front->next;
+                que->count--;
+                free(tmp);
+                printf("\n\n해당 PID의 PDB 삭제 완료!\n\n");
+                return;
+            }
+
+            if (tmp == que->rear)          // 큐에 해당 PCB가 가장 마지막일 때
+            {
+                pre->next = NULL;
+                que->count--;
+                free(tmp);
+                printf("\n\n해당 PID의 PDB 삭제 완료!\n\n");
+                que->rear = pre;
+                return;
+            }
+            else                                                // 큐에 해당 PCB가 중간에 있을 때
+            {
+                pre->next = tmp->next;
+                que->count--;
+                free(tmp);
+                printf("\n\n해당 PID의 PDB 삭제 완료!\n\n");
+                return;
+            }
+        }
+        pre = tmp;
+        tmp = tmp->next;
+    }
 }
